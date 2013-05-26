@@ -1,0 +1,79 @@
+<html>
+<head>
+	<title>Guild Wars 2 Events</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<link rel="stylesheet" type="text/css" href="main.css" />
+	<script type="text/javascript" src="jquery-2.0.0.min.js"></script>
+	<script type="text/javascript" src="main.js"></script>
+	<script type="text/javascript">
+		function display_events(params)
+		{
+			var world_id = params.world_id || 2207; // Defaulting to Dzagonur;
+			var lang = params.lang || "de"; // Defaulting to german
+			var type = params.type || "all";
+
+			$.getJSON("https://api.guildwars2.com/v1/events.json", {world_id: world_id}, function(data)
+			{
+				var currentevents = [];
+				for (var i = 0; i < data.events.length; ++i)
+				{
+					var event = data.events[i];
+					var use = true;
+					if (type == "active")
+						use = (event.state == "Active" || event.state == "Preparation");
+					else if (type == "boss")
+						use = isbossevent(event);
+					else if (type == "bossactive")
+						use = isbossevent(event) && (event.state == "Active" || event.state == "Preparation");
+					if (use)
+						currentevents.push(event);
+				}
+				currentevents.sort(function(a, b){
+					if (a.map_id > b.map_id)
+						return -1;
+					else if (a.map_id < b.map_id)
+						return 1;
+					else if (a.event_id > b.event_id)
+						return -1;
+					else if (a.event_id < b.event_id)
+						return 1;
+					else
+						return 0;
+				});
+				var html = [];
+				html.push("<p class='note'><span class='Success'>Success</span> <span class='Fail'>Fail</span> <span class='Warmup'>Warmup</span> <span class='Preparation'>Preparation</span> <span class='Active'>Active</span></p>");
+
+				if (currentevents.length)
+				{
+					var lastmapname = null;
+					for (var i = 0; i < currentevents.length; ++i)
+					{
+						var event = currentevents[i];
+						var mapname = maps[event.map_id];
+						if (mapname != lastmapname)
+						{
+							html.push("<h1>" + mapname + "</h1>");
+							lastmapname = mapname;
+						}
+						html.push("<p class='" + event.state + "'>" + events[event.event_id] + "</li>");
+					}
+				}
+				else
+				{
+					var msg;
+					if (lang == "de")
+						msg = "Keine aktiven Events!";
+					else
+						msg = "No active events!";
+					html.push("<h1 class='noevents'>" + msg + "</h1>");
+				}
+				$("body").html(html.join(""));
+				window.setTimeout(function(){display_events(params);}, 10*1000);
+			});
+		}
+		$(init(params, display_events));
+	</script>
+</head>
+<body>
+</body>
+</html>

@@ -1,0 +1,69 @@
+@font-face
+{
+	font-family: "Roadgeek2005SeriesD";
+	src: url("http://panic.com/fonts/Roadgeek 2005 Series D/Roadgeek 2005 Series D.otf");
+}
+body
+{
+	background-color: #000;
+	color: #fff;
+	font-family: "Roadgeek2005SeriesD";
+	font-size: 18px;
+	line-height: 24px;
+}
+h1
+{
+	font-size: 24px;
+	line-height: 36px;
+	margin: 0px;
+	padding: 16px 0px 4px 0px;
+}
+h1:first-child
+{
+	padding-top: 0px;
+}
+h1.noevents
+{
+	color: #647076;
+	text-align: center;
+}
+a
+{
+	text-decoration: none;
+}
+a:link
+{
+	color: #ffc600;
+}
+a:visited
+{
+	color: #fc6b00;
+}
+p
+{
+	margin: 0px;
+	padding: 0px 0px 12px 0px;
+	color: #aeb7bc;
+}
+.Success
+{
+	color: #aeb7bc;
+}
+.Fail
+{
+	color: #888;
+}
+.Warmup
+{
+	color: #647076;
+}
+.Active
+{
+	color: #ffc600;
+}
+.Preparation
+{
+	color: #fc6b00;
+}
+
+//	color: #647076;
