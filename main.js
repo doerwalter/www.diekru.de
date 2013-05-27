@@ -141,7 +141,8 @@ var Event = {
 			"295E8D3B-8823-4960-A627-23E07575ED96", // Feuer-Schamane
 			"03BF176A-D59F-49CA-A311-39FC6F533F2F", // Zerschmetterer
 			"31CEBA08-E44D-472F-81B0-7143D73797F5", // Schatten-Behemoth
-			"C5972F64-B894-45B4-BC31-2DEEA6B7C033"  // Dschungel-Wurm
+			"C5972F64-B894-45B4-BC31-2DEEA6B7C033", // Dschungel-Wurm
+			"E6872A86-E434-4FC1-B803-89921FF0F6D6"  // Ulgoth
 		];
 		for (var j = 0; j < chestevents.length; ++j)
 		{
