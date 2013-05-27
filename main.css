@@ -13,16 +13,23 @@ body
 }
 h1
 {
-	font-size: 24px;
-	line-height: 36px;
+	font-size: 28px;
+	line-height: 28px;
 	margin: 0px;
 	padding: 16px 0px 4px 0px;
 }
-h1:first-child
+h2
+{
+	font-size: 20px;
+	line-height: 32px;
+	margin: 0px;
+	padding: 16px 0px 4px 0px;
+}
+h2:first-child
 {
 	padding-top: 0px;
 }
-h1.noevents
+h2.noevents
 {
 	color: #647076;
 	text-align: center;
@@ -33,11 +40,11 @@ a
 }
 a:link
 {
-	color: #ffc600;
+	color: #00ba00;
 }
 a:visited
 {
-	color: #fc6b00;
+	color: #009f99;
 }
 p
 {
@@ -45,25 +52,48 @@ p
 	padding: 0px 0px 12px 0px;
 	color: #aeb7bc;
 }
-.Success
+p.legend
+{
+	font-size: 14px;
+}
+p.legend .Success,
+p.event.Success
 {
 	color: #aeb7bc;
 }
-.Fail
+p.legend .Fail,
+p.event.Fail
 {
 	color: #888;
 }
-.Warmup
+p.legend .Warmup,
+p.event.Warmup
 {
 	color: #647076;
 }
-.Active
+p.legend .Active,
+p.event.Active
 {
 	color: #ffc600;
 }
-.Preparation
+p.legend .Preparation,
+p.event.Preparation
 {
 	color: #fc6b00;
 }
 
-//	color: #647076;
+p.actions
+{
+	font-size: 14px;
+}
+
+p.actions span.action
+{
+	cursor: pointer;
+	color: #00ba00;
+}
+
+p.actions span.noaction
+{
+	font-weight: bold;
+}

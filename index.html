@@ -12,18 +12,25 @@
 
 			var html = ["<h1>Events</h1>"];
 
+			var sorted_worlds = [];
 			for (var world_id in worlds)
+				sorted_worlds.push([worlds[world_id], world_id]);
+			sorted_worlds.sort();
+
+			var types = ["all", "active", "chest", "chestactive"];
+
+			for (var i = 0; i < sorted_worlds.length; ++i)
 			{
-				var worldname = worlds[world_id];
-				html.push("<table>");
-				var types = ["all", "active", "boss", "bossactive"];
+				var worldname = sorted_worlds[i][0];
+				var world_id = sorted_worlds[i][1];
+				html.push("<p>");
 				html.push(worldname);
 				html.push(": ");
 
-				for (var i = 0; i < types.length; ++i)
+				for (var j = 0; j < types.length; ++j)
 				{
-					var type = types[i];
-					if (i)
+					var type = types[j];
+					if (j)
 						html.push(", ");
 					html.push("<a href='events.html?world_id=" + world_id + "&lang=" + lang + "&type=" + type + "'>" + type + "</a>");
 				}
