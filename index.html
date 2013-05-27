@@ -6,10 +6,10 @@
 	<script type="text/javascript" src="jquery-2.0.0.min.js"></script>
 	<script type="text/javascript" src="main.js"></script>
 	<script type="text/javascript">
+		var params = inherit(Params, {lang: "de"}).create();
+
 		function display_index(params)
 		{
-			var lang = params.lang || "de"; // Defaulting to german
-
 			var html = ["<h1>Events</h1>"];
 
 			var sorted_worlds = [];
@@ -32,7 +32,7 @@
 					var type = types[j];
 					if (j)
 						html.push(", ");
-					html.push("<a href='events.html?world_id=" + world_id + "&lang=" + lang + "&type=" + type + "'>" + type + "</a>");
+					html.push("<a href='events.html?world_id=" + world_id + "&lang=" + params.lang + "&type=" + type + "'>" + type + "</a>");
 				}
 				html.push("</p>");
 			}

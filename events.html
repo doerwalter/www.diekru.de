@@ -37,19 +37,20 @@
 			html.push("<h1>");
 			html.push(title);
 			html.push("</h1>");
-			html.push("<p class='legend'><span class='Success'>Success</span>\xa0\xa0\xa0<span class='Fail'>Fail</span>\xa0\xa0\xa0<span class='Warmup'>Warmup</span>\xa0\xa0\xa0<span class='Preparation'>Preparation</span>\xa0\xa0\xa0<span class='Active'>Active</span></p>");
 
 			html.push("<p class='actions'>");
+			html.push("<a href='./'>Serverauswahl</a>\xa0\xa0|\xa0\xa0Filter:");
 			var types = ["all", "active", "chest", "chestactive"];
 
 			var type = params.type || "chestactive";
 			for (var i = 0; i < types.length; ++i)
 			{
-				if (i)
-					html.push("\xa0\xa0\xa0")
+				html.push("\xa0\xa0")
 				html.push("<span class='type " + (type === types[i] ? "noaction" : "action") + " " + types[i] + "' data-type='" + types[i] + "'>" + types[i] + "</span>")
 			}
 			html.push("</p>");
+
+			html.push("<p class='legend'><span class='Success'>Success</span>\xa0\xa0\xa0<span class='Fail'>Fail</span>\xa0\xa0\xa0<span class='Warmup'>Warmup</span>\xa0\xa0\xa0<span class='Preparation'>Preparation</span>\xa0\xa0\xa0<span class='Active'>Active</span></p>");
 
 			var cmp = function(a, b)
 			{
