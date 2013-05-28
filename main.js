@@ -112,7 +112,7 @@ var Event = {
 		if (seconds < 10)
 			v.push("0");
 		v.push(seconds + "");
-		return "<p id='event-" + this.event_id + "' class='event " + this.state + "'>[" + v.join("") + "] " + this.names[lang] + "</p>";
+		return "<p id='event-" + this.event_id + "' class='event " + this.state + "'><span class='timestamp'>[" + v.join("") + "]</span> " + this.names[lang] + "</p>";
 	},
 
 	show: function(type)
@@ -153,28 +153,110 @@ var Event = {
 	}
 };
 
+var World = {
+	create: function(world_id)
+	{
+		var world = clone(this);
+		world.world_id = world_id;
+		world.names = {};
+		return world;
+	},
+
+	addname: function(lang, name)
+	{
+		this.names[lang] = name;
+	}
+};
+
+var Map = {
+	create: function(map_id)
+	{
+		var map = clone(this);
+		map.map_id = map_id;
+		map.names = {};
+		return map;
+	},
+
+	addname: function(lang, name)
+	{
+		this.names[lang] = name;
+	}
+};
+
 var langs = {};
 var maps = {};
 var events = {};
 var worlds = {};
 
-function init(params, callback)
+function fetch_worlds(params, callback)
 {
-	var lang = params.lang || 'de';
-
-	// Fetch information about worlds
-	$.getJSON("https://api.guildwars2.com/v1/world_names.json", {lang: lang}, function(data)
+	// We don't have the world data yet => fetch them and create the world objects
+	if (!bool(worlds) || !langs[params.lang])
 	{
-		for (var i = 0; i < data.length; ++i)
-			worlds[data[i].id] = data[i].name.replace(/<br>/g, ' ');
-
-		// Fetch information about maps
-		$.getJSON("https://api.guildwars2.com/v1/map_names.json", {lang: lang}, function(data)
+		$.getJSON("https://api.guildwars2.com/v1/world_names.json", {lang: params.lang}, function(data)
 		{
 			for (var i = 0; i < data.length; ++i)
-				maps[data[i].id] = data[i].name;
+			{
+				var world = worlds[data[i].id];
 
-			callback(params);
+				if (!world)
+					worlds[data[i].id] = world = World.create(data[i].id);
+
+				world.addname(params.lang, data[i].name.replace(/<br>/g, ' '));
+			}
+			if (callback)
+				callback(params);
 		});
-	});
+	}
+	else
+	{
+		if (callback)
+			callback(params);
+	}
+}
+
+function fetch_maps(params, callback)
+{
+	// We don't have the map data yet => fetch them and create the map objects
+	if (!bool(maps) || !langs[params.lang])
+	{
+		$.getJSON("https://api.guildwars2.com/v1/map_names.json", {lang: params.lang}, function(data)
+		{
+			for (var i = 0; i < data.length; ++i)
+			{
+				var map = maps[data[i].id];
+
+				if (!map)
+					maps[data[i].id] = map = Map.create(data[i].id);
+
+				map.addname(params.lang, data[i].name.replace(/<br>/g, ' '));
+			}
+			if (callback)
+				callback(params);
+		});
+	}
+	else
+	{
+		if (callback)
+			callback(params);
+	}
+}
+
+function init(params, callback)
+{
+	fetch_worlds(
+		params,
+		function(params)
+		{
+			fetch_maps(
+				params,
+				function(params)
+				{
+					if (callback)
+						callback(params);
+					langs[params.lang] = true;
+				}
+			);
+		}
+	);
 }

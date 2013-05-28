@@ -102,3 +102,8 @@ p.actions span.noaction
 {
 	font-weight: bold;
 }
+
+span.timestamp
+{
+	font-size: 14px;
+}

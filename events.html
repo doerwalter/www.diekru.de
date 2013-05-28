@@ -24,7 +24,7 @@
 
 		function make_title(params)
 		{
-			return worlds[params.world_id] + ": Events";
+			return worlds[params.world_id].names[params.lang] + ": Events";
 		}
 
 		function make_html(params)
@@ -83,7 +83,7 @@
 				{
 					if (event.map_id != lastmapid)
 					{
-						html.push("<h2>" + maps[event.map_id] + "</h2>");
+						html.push("<h2>" + maps[event.map_id].names[params.lang] + "</h2>");
 						lastmapid = event.map_id;
 					}
 					html.push(event.html(params.lang));
@@ -128,8 +128,10 @@
 				{
 					for (var i = 0; i < data_event_states.events.length; ++i)
 					{
-						var event_data = data_event_state.events[i];
-						events[event_data.event_id].setstate(event_data.state);
+						var event_data = data_event_states.events[i];
+						var event = events[event_data.event_id];
+						if (event)
+							event.setstate(event_data.state);
 					}
 
 					make_html(params);
