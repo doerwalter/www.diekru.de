@@ -13,32 +13,44 @@ body
 }
 h1
 {
-	font-size: 28px;
-	line-height: 28px;
-	margin: 0px;
-	padding: 16px 0px 4px 0px;
-}
-h1.first-child
-{
-	padding-top: 0px;
-}
-
-h2
-{
-	font-size: 20px;
+	font-size: 32px;
 	line-height: 32px;
 	margin: 0px;
-	padding: 16px 0px 4px 0px;
+	padding: 16px 0px 12px 0px;
+}
+h2
+{
+	font-size: 24px;
+	line-height: 24px;
+	margin: 0px;
+	padding: 4px 0px 12px 0px;
 }
 h2:first-child
 {
 	padding-top: 0px;
 }
-h2.noevents
+
+hgroup > h1
 {
-	color: #647076;
-	text-align: center;
+	padding-bottom: 4px;
 }
+hgroup > h2
+{
+	padding-top: 4px;
+}
+
+h3
+{
+	font-size: 20px;
+	line-height: 28px;
+	margin: 0px;
+	padding: 16px 0px 4px 0px;
+}
+h3:first-child
+{
+	padding-top: 0px;
+}
+
 a
 {
 	text-decoration: none;

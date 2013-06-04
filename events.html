@@ -22,21 +22,13 @@
 			return "events.html?world_id=" + params.world_id + "&lang=" + params.lang + "&type=" + params.type;
 		}
 
-		function make_title(params)
-		{
-			return worlds[params.world_id].names[params.lang] + ": Events";
-		}
-
 		function make_html(params)
 		{
 			// Create HTML from the data we have now
-			var title = make_title(params);
+			window.title = worlds[params.world_id].names[params.lang] + ": Events";
 
-			window.title = title;
 			var html = [];
-			html.push("<h1>");
-			html.push(title);
-			html.push("</h1>");
+			html.push("<hgroup><h1>" + worlds[params.world_id].names[params.lang] + "</h1><h2>Events</h2></hgroup>");
 
 			html.push("<p class='actions'>");
 			html.push("<a href='./'>Serverauswahl</a>\xa0\xa0|\xa0\xa0Filter:");
@@ -83,7 +75,7 @@
 				{
 					if (event.map_id != lastmapid)
 					{
-						html.push("<h2>" + maps[event.map_id].names[params.lang] + "</h2>");
+						html.push("<h3>" + maps[event.map_id].names[params.lang] + "</h3>");
 						lastmapid = event.map_id;
 					}
 					html.push(event.html(params.lang));
@@ -108,9 +100,11 @@
 							var event_data = data_event_states.events[i];
 							var event = events[event_data.event_id];
 							if (!event)
+							{
 								event = Event.create(event_data.map_id, event_data.event_id);
+								events[event.event_id] = event;
+							}
 							event.setstate(event_data.state);
-							events[event.event_id] = event;
 						}
 
 						for (var i = 0; i < data_events.length; ++i)
