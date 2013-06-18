@@ -244,7 +244,7 @@ function fetch_maps(params, callback)
 				if (!map)
 					maps[data[i].id] = map = Map.create(data[i].id);
 
-				map.addname(params.lang, data[i].name.replace(/<br>/g, ' '));
+				map.addname(params.lang, data[i].name);
 			}
 			if (callback)
 				callback(params);
