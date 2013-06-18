@@ -217,7 +217,7 @@ function fetch_worlds(params, callback)
 				if (!world)
 					worlds[data[i].id] = world = World.create(data[i].id);
 
-				world.addname(params.lang, data[i].name.replace(/<br>/g, ' '));
+				world.addname(params.lang, data[i].name);
 			}
 			if (callback)
 				callback(params);
