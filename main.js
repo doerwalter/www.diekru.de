@@ -7,271 +7,252 @@ function clone(obj)
 	return result;
 };
 
-// Adds attributes from on object to another and returns it
-function extend(obj, attrs)
+function mod(obj1, obj2)
 {
-	for (var name in attrs)
-		obj[name] = attrs[name];
-	return obj;
+	var div = Math.floor(obj1 / obj2);
+	var mod = obj1 - div * obj2;
+
+	if (mod !== 0 && ((obj2 < 0 && mod > 0) || (obj2 > 0 && mod < 0)))
+	{
+		mod += obj2;
+		--div;
+	}
+	return obj1 - div * obj2;
 };
 
-// Clone an object and extend it
-function inherit(baseobj, attrs)
+function lpad(string, pad, len)
 {
-	return extend(clone(baseobj), attrs);
+	if (typeof(string) === "number")
+		string = string.toString();
+	while (string.length < len)
+		string = pad + string;
+	return string;
 };
 
-function bool(obj)
+function minutes()
 {
-	for (var key in obj)
-		return true;
-	return false;
+	var now = new Date();
+	return 60*now.getHours() + now.getMinutes();
+}
+
+function format_minutes(minutes)
+{
+	return lpad(Math.floor(minutes/60), "0", 2) + ":" + lpad(minutes % 60, "0", 2);
 };
 
-var Params =
+function min(x, y)
 {
-	create: function()
-	{
-		var params = clone(this);
-		var query = location.search.substr(1).split("&");
-		for (var i = 0; i < query.length; ++i)
-		{
-			var item = query[i].split("=");
-			params[item[0]] = item[1];
-		}
-		return params;
-	}
+	return x < y ? x : y;
 }
 
-function islist(obj)
-{
-	return Object.prototype.toString.call(obj) == "[object Array]";
-}
+var Color = {
+	create: function(r, g, b)
+	{
+		var c = clone(this);
+		c.r = typeof(r) !== "undefined" ? Math.round(r) : 0;
+		c.g = typeof(g) !== "undefined" ? Math.round(g) : 0;
+		c.b = typeof(b) !== "undefined" ? Math.round(b) : 0;
+		return c;
+	},
 
-function sorted(seq, cmp)
-{
-	var newlist = [];
-	if (islist(seq))
+	toString: function()
 	{
-		for (var i = 0; i < seq.length; ++i)
-			newlist.push(seq[i]);
-	}
-	else
+		var r = lpad(this.r.toString(16), "0", 2);
+		var g = lpad(this.g.toString(16), "0", 2);
+		var b = lpad(this.b.toString(16), "0", 2);
+		if (r[0] === r[1] && g[0] === g[1] && b[0] === b[1])
+			return "#" + r[0] + g[0] + b[0];
+		else
+			return "#" + r + g + b;
+	},
+
+	mix: function(value1, color1, value2, color2)
 	{
-		for (var key in seq)
-			newlist.push(key);
+		var sum = value1 + value2;
+
+		return Color.create(
+			(value1*color1.r+value2*color2.r)/sum,
+			(value1*color1.g+value2*color2.g)/sum,
+			(value1*color1.b+value2*color2.b)/sum
+		);
 	}
-	if (cmp)
-		newlist.sort(cmp);
-	else
-		newlist.sort();
-	return newlist;
-}
+};
+
 
 var Event = {
-	create: function(map_id, event_id)
+	dist_past: 30,
+	dist_future: 120,
+	color_past: Color.create(255, 0, 0),
+	color_future: Color.create(0, 255, 0),
+	color_faroff: Color.create(64, 64, 64),
+
+	create: function(name, time_pdt, time_est, time_mesz)
 	{
 		var event = clone(this);
-		event.map_id = map_id;
-		event.event_id = event_id;
-		event.names = {};
-		event.ischest = event._ischest();
-		event.start = new Date();
-		event.state = null; // unknown
+		event.name = name;
+		event.time_pdt = time_pdt;
+		event.time_est = time_est;
+		event.time_mesz = time_mesz;
+
 		return event;
 	},
 
-	addname: function(lang, name)
+	mins: function()
 	{
-		this.names[lang] = name;
+		var parts = this.time_mesz.split(":");
+		return 60*parts[0] + 1*parts[1];
 	},
 
-	setstate: function(newstate)
+	dist: function()
 	{
-		if (newstate != this.state)
+		return mod((this.mins() - minutes()), 1440);
+	},
+
+	visible: function()
+	{
+		var dist = this.dist();
+		return (dist >= 1440-this.dist_past) || (dist < this.dist_future);
+	},
+
+	html: function()
+	{
+		if (!this.visible())
+			return null;
+		var html, dist = this.dist(), isfuture = dist < 720, cssclass = isfuture ? "future" : "past", color;
+		if (isfuture)
 		{
-			this.state = newstate;
-			this.start = new Date();
+			if (dist == 0)
+				html = "<td class='dist'>jetzt</td>";
+			else
+				html = "<td class='dist'>in " + dist + " min</td>";
+			color = Color.mix(dist, this.color_faroff, this.dist_future-dist, this.color_future);
 		}
-	},
-
-	html: function(lang)
-	{
-		var diff = (new Date()) - this.start;
-		diff = Math.floor(diff/1000);
-		var seconds = diff % 60;
-		diff = Math.floor(diff/60);
-		var minutes = diff % 60;
-		diff = Math.floor(diff/60);
-		var v = [];
-		if (diff)
-			v.push(diff + ":");
-		if (minutes < 10)
-			v.push("0");
-		v.push(minutes + ":");
-		if (seconds < 10)
-			v.push("0");
-		v.push(seconds + "");
-		return "<p id='event-" + this.event_id + "' class='event " + this.state + "'><span class='timestamp'>[" + v.join("") + "]</span> " + this.names[lang] + "</p>";
-	},
-
-	show: function(type)
-	{
-		if (type == "active")
-			return (this.state == "Active" || this.state == "Preparation");
-		else if (type == "chest")
-			return this.ischest;
-		else if (type == "chestactive")
-			return this.ischest && (this.state == "Active" || this.state == "Preparation");
 		else
-			return true;
-	},
-
-	_ischest: function()
-	{
-		var chestevents = [
-			"568A30CF-8512-462F-9D67-647D69BEFAED", // Tequatl
-			"C876757A-EF3E-4FBE-A484-07FF790D9B05", // Megazerstörer
-			"3ED4FEB4-A976-4597-94E8-8BFD9053522F", // Inquestur-Golem
-			"9AA133DC-F630-4A0E-BB5D-EE34A2B306C2",
-			"2C833C11-5CD5-4D96-A4CE-A74C04C9A278", // Feuerelementar
-			"5E4E9CD9-DD7C-49DB-8392-C99E1EF4E7DF", //
-			"33F76E9E-0BB6-46D0-A3A9-BE4CDFC4A3A4", //
-			"BFD87D5B-6419-4637-AFC5-35357932AD2C", // Klaue Jormags
-			"0464CB9E-1848-4AAA-BA31-4779A959DD71", //
-			"295E8D3B-8823-4960-A627-23E07575ED96", // Feuer-Schamane
-			"03BF176A-D59F-49CA-A311-39FC6F533F2F", // Zerschmetterer
-			"31CEBA08-E44D-472F-81B0-7143D73797F5", // Schatten-Behemoth
-			"C5972F64-B894-45B4-BC31-2DEEA6B7C033", // Dschungel-Wurm
-			"E6872A86-E434-4FC1-B803-89921FF0F6D6", // Ulgoth
-			"526732A0-E7F2-4E7E-84C9-7CDED1962000", // Dwayna
-			"7EF31D63-DB2A-4FEB-A6C6-478F382BFBCB",
-			"6A6FD312-E75C-4ABF-8EA1-7AE31E469ABA",
-			"351F7480-2B1C-4846-B03B-ED1B8556F3D7", // Melandru
-			"A5B5C2AF-22B1-4619-884D-F231A0EE0877",
-			"7E24F244-52AF-49D8-A1D7-8A1EE18265E0",
-			"C2AB5C4C-5FAA-449B-985C-93F8E2D579C8", // Grenth
-			"B41C90F8-AF33-400E-9AD3-3DB0AFCEDC6C",
-			"4B612C93-3700-43B8-B3C1-CBC64FEC0566",
-			"1D1BE3D6-2F0D-4D1C-8233-812AAF261CFF",
-			"27E2F73C-E26B-4046-AC06-72C442D9B2B7",
-			"C8139970-BE46-419B-B026-485A14002D44",
-			"E16113B1-CE68-45BB-9C24-91523A663BCB",
-			"F479B4CF-2E11-457A-B279-90822511B53B" // Karka-Königin
-		];
-		for (var j = 0; j < chestevents.length; ++j)
 		{
-			if (chestevents[j] == this.event_id)
-				return true;
+			dist = 1440-dist;
+			html = "<td class='dist'>vor " + dist + " min</td>";
+			color = Color.mix(dist, this.color_faroff, this.dist_past-dist, this.color_past);
 		}
-		return false;
+		html += "<td class='time'>" + this.time_mesz + "</td><th>" + this.name + "</th>";
+		return $("<tr class='" + cssclass + "' style='color: " + color.toString() + "'>" + html + "</tr>");
 	}
 };
 
-var World = {
-	create: function(world_id)
-	{
-		var world = clone(this);
-		world.world_id = world_id;
-		world.names = {};
-		return world;
-	},
+var events = [
+	Event.create('Megazerstörer', '16:00', '19:00', '1:00'),
+	Event.create('Dschungelwurm', '16:15', '19:15', '1:15'),
+	Event.create('Schatten-Behemoth', '16:45', '19:45', '1:45'),
+	Event.create('Der Zerschmetterer', '17:00', '20:00', '2:00'),
+	Event.create('Svanir-Schamane', '17:15', '20:15', '2:15'),
+	Event.create('Modniir Ulgoth', '17:30', '20:30', '2:30'),
+	Event.create('Feuerelementar', '17:45', '20:45', '2:45'),
+	Event.create('Karka-Königin', '18:00', '21:00', '3:00'),
+	Event.create('Dschungelwurm', '18:15', '21:15', '3:15'),
+	Event.create('Golem Typ II', '18:30', '21:30', '3:30'),
+	Event.create('Schatten-Behemoth', '18:45', '21:45', '3:45'),
+	Event.create('Tequatl', '19:00', '22:00', '4:00'),
+	Event.create('Svanir-Schamane', '19:15', '22:15', '4:15'),
+	Event.create('Klaue von Jormag', '19:30', '22:30', '4:30'),
+	Event.create('Feuerelementar', '19:45', '22:45', '4:45'),
+	Event.create('Großer Dschungelwurm', '20:00', '23:00', '5:00'),
+	Event.create('Dschungelwurm', '20:15', '23:15', '5:15'),
+	Event.create('Taidha Covington', '20:30', '23:30', '5:30'),
+	Event.create('Schatten-Behemoth', '20:45', '23:45', '5:45'),
+	Event.create('Megazerstörer', '21:00', '0:00', '6:00'),
+	Event.create('Svanir-Schamane', '21:15', '0:15', '6:15'),
+	Event.create('Feuerelementar', '21:45', '0:45', '6:45'),
+	Event.create('Der Zerschmetterer', '22:00', '1:00', '7:00'),
+	Event.create('Dschungelwurm', '22:15', '1:15', '7:15'),
+	Event.create('Modniir Ulgoth', '22:30', '1:30', '7:30'),
+	Event.create('Schatten-Behemoth', '22:45', '1:45', '7:45'),
+	Event.create('Golem Typ II', '23:00', '2:00', '8:00'),
+	Event.create('Svanir-Schamane', '23:15', '2:15', '8:15'),
+	Event.create('Klaue von Jormag', '23:30', '2:30', '8:30'),
+	Event.create('Feuerelementar', '23:45', '2:45', '8:45'),
+	Event.create('Der Zerschmetterer', '24:00:00', '3:00', '9:00'),
+	Event.create('Dschungelwurm', '0:15', '3:15', '9:15'),
+	Event.create('Modniir Ulgoth', '0:30', '3:30', '9:30'),
+	Event.create('Schatten-Behemoth', '0:45', '3:45', '9:45'),
+	Event.create('Golem Typ II', '1:00', '4:00', '10:00'),
+	Event.create('Svanir-Schamane', '1:15', '4:15', '10:15'),
+	Event.create('Klaue von Jormag', '1:30', '4:30', '10:30'),
+	Event.create('Feuerelementar', '1:45', '4:45', '10:45'),
+	Event.create('Taidha Covington', '2:00', '5:00', '11:00'),
+	Event.create('Dschungelwurm', '2:15', '5:15', '11:15'),
+	Event.create('Megazerstörer', '2:30', '5:30', '11:30'),
+	Event.create('Schatten-Behemoth', '2:45', '5:45', '11:45'),
+	Event.create('Svanir-Schamane', '3:15', '6:15', '12:15'),
+	Event.create('Karka-Königin', '3:30', '6:30', '12:30'),
+	Event.create('Feuerelementar', '3:45', '6:45', '12:45'),
+	Event.create('Der Zerschmetterer', '4:00', '7:00', '13:00'),
+	Event.create('Dschungelwurm', '4:15', '7:15', '13:15'),
+	Event.create('Tequatl', '4:30', '7:30', '13:30'),
+	Event.create('Schatten-Behemoth', '4:45', '7:45', '13:45'),
+	Event.create('Modniir Ulgoth', '5:00', '8:00', '14:00'),
+	Event.create('Svanir-Schamane', '5:15', '8:15', '14:15'),
+	Event.create('Großer Dschungelwurm', '5:30', '8:30', '14:30'),
+	Event.create('Feuerelementar', '5:45', '8:45', '14:45'),
+	Event.create('Golem Typ II', '6:00', '9:00', '15:00'),
+	Event.create('Dschungelwurm', '6:15', '9:15', '15:15'),
+	Event.create('Klaue von Jormag', '6:30', '9:30', '15:30'),
+	Event.create('Schatten-Behemoth', '6:45', '9:45', '15:45'),
+	Event.create('Taidha Covington', '7:00', '10:00', '16:00'),
+	Event.create('Dschungelwurm', '7:15', '10:15', '16:15'),
+	Event.create('Megazerstörer', '7:30', '10:30', '16:30'),
+	Event.create('Feuerelementar', '7:45', '10:45', '16:45'),
+	Event.create('Dschungelwurm', '8:15', '11:15', '17:15'),
+	Event.create('Der Zerschmetterer', '8:30', '11:30', '17:30'),
+	Event.create('Schatten-Behemoth', '8:45', '11:45', '17:45'),
+	Event.create('Karka-Königin', '9:00', '12:00', '18:00'),
+	Event.create('Svanir-Schamane', '9:15', '12:15', '18:15'),
+	Event.create('Modniir Ulgoth', '9:30', '12:30', '18:30'),
+	Event.create('Feuerelementar', '9:45', '12:45', '18:45'),
+	Event.create('Tequatl', '10:00', '13:00', '19:00'),
+	Event.create('Dschungelwurm', '10:15', '13:15', '19:15'),
+	Event.create('Golem Typ II', '10:30', '13:30', '19:30'),
+	Event.create('Schatten-Behemoth', '10:45', '13:45', '19:45'),
+	Event.create('Großer Dschungelwurm', '11:00', '14:00', '20:00'),
+	Event.create('Svanir-Schamane', '11:15', '14:15', '20:15'),
+	Event.create('Klaue von Jormag', '11:30', '14:30', '20:30'),
+	Event.create('Feuerelementar', '11:45', '14:45', '20:45'),
+	Event.create('Taidha Covington', '12:00', '15:00', '21:00'),
+	Event.create('Dschungelwurm', '12:15', '15:15', '21:15'),
+	Event.create('Megazerstörer', '12:30', '15:30', '21:30'),
+	Event.create('Schatten-Behemoth', '12:45', '15:45', '21:45'),
+	Event.create('Svanir-Schamane', '13:15', '16:15', '22:15'),
+	Event.create('Der Zerschmetterer', '13:30', '16:30', '22:30'),
+	Event.create('Feuerelementar', '13:45', '16:45', '22:45'),
+	Event.create('Modniir Ulgoth', '14:00', '17:00', '23:00'),
+	Event.create('Dschungelwurm', '14:15', '17:15', '23:15'),
+	Event.create('Golem Typ II', '14:30', '17:30', '23:30'),
+	Event.create('Schatten-Behemoth', '14:45', '17:45', '23:45'),
+	Event.create('Klaue von Jormag', '15:00', '18:00', '0:00'),
+	Event.create('Svanir-Schamane', '15:15', '18:15', '0:15'),
+	Event.create('Taidha Covington', '15:30', '18:30', '0:30'),
+	Event.create('Feuerelementar', '15:45', '18:45', '0:45')
+];
 
-	addname: function(lang, name)
-	{
-		this.names[lang] = name;
-	}
-};
-
-var Map = {
-	create: function(map_id)
-	{
-		var map = clone(this);
-		map.map_id = map_id;
-		map.names = {};
-		return map;
-	},
-
-	addname: function(lang, name)
-	{
-		this.names[lang] = name;
-	}
-};
-
-var langs = {};
-var maps = {};
-var events = {};
-var worlds = {};
-
-function fetch_worlds(params, callback)
+function make_events()
 {
-	// We don't have the world data yet => fetch them and create the world objects
-	if (!bool(worlds) || !langs[params.lang])
+	var allhtml = $("<table id='events'/>"), lastdist = null;
+	for (var i = 0; i < events.length; ++i)
 	{
-		$.getJSON("https://api.guildwars2.com/v1/world_names.json", {lang: params.lang}, function(data)
+		var event = events[i], dist = event.dist();
+
+		if (lastdist > 720 && dist < 720)
 		{
-			for (var i = 0; i < data.length; ++i)
-			{
-				var world = worlds[data[i].id];
-
-				if (!world)
-					worlds[data[i].id] = world = World.create(data[i].id);
-
-				world.addname(params.lang, data[i].name);
-			}
-			if (callback)
-				callback(params);
-		});
+			allhtml.append("<tr class='now'><td></td><td>" + format_minutes(minutes()) + "</td><td></td></tr>");
+		}
+		var html = event.html();
+		if (html !== null)
+			allhtml.append(html);
+		lastdist = dist;
 	}
-	else
-	{
-		if (callback)
-			callback(params);
-	}
+	allhtml.replaceAll("#events");
 }
 
-function fetch_maps(params, callback)
+function make_events_handler()
 {
-	// We don't have the map data yet => fetch them and create the map objects
-	if (!bool(maps) || !langs[params.lang])
-	{
-		$.getJSON("https://api.guildwars2.com/v1/map_names.json", {lang: params.lang}, function(data)
-		{
-			for (var i = 0; i < data.length; ++i)
-			{
-				var map = maps[data[i].id];
-
-				if (!map)
-					maps[data[i].id] = map = Map.create(data[i].id);
-
-				map.addname(params.lang, data[i].name);
-			}
-			if (callback)
-				callback(params);
-		});
-	}
-	else
-	{
-		if (callback)
-			callback(params);
-	}
-}
-
-function init(params, callback)
-{
-	fetch_worlds(
-		params,
-		function(params)
-		{
-			fetch_maps(
-				params,
-				function(params)
-				{
-					if (callback)
-						callback(params);
-					langs[params.lang] = true;
-				}
-			);
-		}
-	);
+	make_events();
+	window.setTimeout(make_events_handler, 10000);
 }

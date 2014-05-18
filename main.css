@@ -10,112 +10,55 @@ body
 	font-family: "Roadgeek2005SeriesD";
 	font-size: 18px;
 	line-height: 24px;
+	margin: 20px;
 }
 h1
 {
 	font-size: 32px;
 	line-height: 32px;
 	margin: 0px;
-	padding: 16px 0px 12px 0px;
-}
-h2
-{
-	font-size: 24px;
-	line-height: 24px;
-	margin: 0px;
-	padding: 4px 0px 12px 0px;
-}
-h2:first-child
-{
-	padding-top: 0px;
+	font-weight: normal;
+	color: #999;
+	padding: 0px 0px 16px 0px;
 }
 
-hgroup > h1
+table#events tr.past
 {
-	padding-bottom: 4px;
-}
-hgroup > h2
-{
-	padding-top: 4px;
+	color: #999;
 }
 
-h3
+table#events tr.future
 {
-	font-size: 20px;
-	line-height: 28px;
-	margin: 0px;
-	padding: 16px 0px 4px 0px;
-}
-h3:first-child
-{
-	padding-top: 0px;
+	color: #fff;
 }
 
-a
+table#events
 {
-	text-decoration: none;
-}
-a:link
-{
-	color: #00ba00;
-}
-a:visited
-{
-	color: #009f99;
-}
-p
-{
-	margin: 0px;
-	padding: 0px 0px 12px 0px;
-	color: #aeb7bc;
-}
-p.legend
-{
-	font-size: 14px;
-}
-p.legend .Success,
-p.event.Success
-{
-	color: #aeb7bc;
-}
-p.legend .Fail,
-p.event.Fail
-{
-	color: #888;
-}
-p.legend .Warmup,
-p.event.Warmup
-{
-	color: #647076;
-}
-p.legend .Active,
-p.event.Active
-{
-	color: #ffc600;
-}
-p.legend .Preparation,
-p.event.Preparation
-{
-	color: #fc6b00;
+	margin: 0;
+	padding: 0;
 }
 
-p.actions
+table#events th,
+table#events td
 {
-	font-size: 14px;
+	font-weight: normal;
+	padding: 0px 10px 10px 0px;
+}
+table#events td.dist
+{
+	text-align: right;
+}
+table#events td.time
+{
+	text-align: right;
+}
+table#events th
+{
+	text-align: left;
 }
 
-p.actions span.action
+table#events tr.now td
 {
-	cursor: pointer;
-	color: #00ba00;
-}
-
-p.actions span.noaction
-{
-	font-weight: bold;
-}
-
-span.timestamp
-{
-	font-size: 14px;
+	color: #ccc;
+	text-align: right;
 }
