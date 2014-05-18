@@ -80,7 +80,7 @@ var Color = {
 
 
 var Event = {
-	dist_past: 30,
+	dist_past: 45,
 	dist_future: 120,
 	color_past: Color.create(255, 0, 0),
 	color_future: Color.create(0, 255, 0),
