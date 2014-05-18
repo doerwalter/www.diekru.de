@@ -50,7 +50,7 @@ table#events td.dist
 }
 table#events td.time
 {
-	text-align: right;
+	text-align: center;
 }
 table#events th
 {
@@ -60,5 +60,5 @@ table#events th
 table#events tr.now td
 {
 	color: #ccc;
-	text-align: right;
+	text-align: center;
 }
