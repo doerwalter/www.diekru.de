@@ -235,13 +235,15 @@ var events = [
 function make_events()
 {
 	var allhtml = $("<table id='events'/>"), lastdist = null;
+	var now = minutes();
+	var offset = Math.floor(now/1440*events.length+events.length/2);
 	for (var i = 0; i < events.length; ++i)
 	{
-		var event = events[i], dist = event.dist();
+		var event = events[mod(i+offset, events.length)], dist = event.dist();
 
 		if (lastdist > 720 && dist < 720)
 		{
-			allhtml.append("<tr class='now'><td></td><td>" + format_minutes(minutes()) + "</td><td></td></tr>");
+			allhtml.append("<tr class='now'><td></td><td>" + format_minutes(now) + "</td><td></td></tr>");
 		}
 		var html = event.html();
 		if (html !== null)
