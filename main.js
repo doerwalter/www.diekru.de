@@ -94,8 +94,7 @@ var Color = {
 	}
 };
 
-
-var Event = {
+var EventDate = {
 	dist_past: 45,
 	dist_future: 120,
 	color_past: Color.create(255, 0, 0),
@@ -107,13 +106,12 @@ var Event = {
 		return minutes(date) - utcminutes(date);
 	})(),
 
-	create: function(name, time_utc)
+	create: function(event, time_utc)
 	{
-		var event = clone(this);
-		event.name = name;
-		event.time_utc = time_utc;
-
-		return event;
+		var eventdate = clone(this);
+		eventdate.event = event;
+		eventdate.time_utc = time_utc;
+		return eventdate;
 	},
 
 	minutes: function()
@@ -157,9 +155,34 @@ var Event = {
 			html = "<td class='dist'>vor " + dist + " min</td>";
 			color = Color.mix(dist, this.color_faroff, this.dist_past-dist, this.color_past);
 		}
-		html += "<td class='time'>" + this.format_minutes() + "</td><th>" + this.name + "</th>";
+		html += "<td class='time'>" + this.format_minutes() + "</td><th>" + this.event.name + "</th>";
 		return $("<tr class='" + cssclass + "' style='color: " + color.toString() + "'>" + html + "</tr>");
 	}
+};
+
+var Event = {
+	events: {},
+
+	create: function(name, time_utc)
+	{
+		var event;
+
+		if (typeof(this.events[name]) === "undefined")
+		{
+			event = clone(this);
+			event.name = name;
+			event.dates = [];
+			this.events[name] = event;
+		}
+		else
+			event = this.events[name];
+		var eventdate = EventDate.create(event, time_utc);
+		event.dates.push(eventdate);
+
+		return eventdate;
+	},
+
+
 };
 
 var events = [
