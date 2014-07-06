@@ -157,10 +157,10 @@ var EventDate = {
 			html = "<td class='dist'>vor " + dist + " min</td>";
 			color = Color.mix(dist, this.color_faroff, this.dist_past-dist, this.color_past);
 		}
-		html += "<td class='time'>" + this.format_minutes() + "</td><td class='state'>" + (this.event.done ? "\u2713" : "") + "</td><th>" + this.event.name + "</th>";
+		html += "<td class='time'>" + this.format_minutes() + "</td><td class='state'>\u2713</td><th>" + this.event.name + "</th>";
 		html = $("<tr class='event " + cssclass + "'" + (this.event.done ? "" : " style='color: " + color.toString() + "'") + ">" + html + "</tr>");
 		var self = this;
-		html.click(function(event){self.toggle()});
+		html.on("tap", function(event){self.toggle()});
 		return html;
 	},
 
@@ -337,8 +337,8 @@ function make_events()
 	}
 	if (anydone)
 	{
-		var reset = $("<tr class='reset'><td colspan='4'>Erledigtstatus zurücksetzen</td></tr>");
-		reset.click(function(event){
+		var reset = $('<tr class="reset"><td colspan="4">"Erledigt"-Status zurücksetzen</td></tr>');
+		reset.on("tap", function(event){
 			for (var name in Event.events)
 			{
 				Event.events[name].done = false;

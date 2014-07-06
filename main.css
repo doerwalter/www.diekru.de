@@ -1,13 +1,8 @@
-@font-face
-{
-	font-family: "Roadgeek2005SeriesD";
-	src: url("http://panic.com/fonts/Roadgeek 2005 Series D/Roadgeek 2005 Series D.otf");
-}
 body
 {
 	background-color: #000;
 	color: #fff;
-	font-family: "Roadgeek2005SeriesD";
+	font-family: "Verdana", sans-serif;
 	font-size: 18px;
 	line-height: 24px;
 	margin: 20px;
@@ -66,8 +61,12 @@ table#events td.time
 table#events td.state
 {
 	text-align: center;
-	min-width: 12px;
+	visibility: hidden;
 	color: #999;
+}
+table#events tr.done td.state
+{
+	visibility: visible;
 }
 table#events tr.reset td
 {
