@@ -29,10 +29,26 @@ function lpad(string, pad, len)
 	return string;
 };
 
-function minutes()
+function minutes(date)
 {
 	var now = new Date();
 	return 60*now.getHours() + now.getMinutes();
+}
+
+function utcminutes(date)
+{
+	var now = new Date();
+	return 60*now.getUTCHours() + now.getUTCMinutes();
+}
+
+function addminutes(mins1, mins2)
+{
+	var sum = mins1 + mins2;
+	if (sum >= 1440)
+		sum -= 1440;
+	else if (sum < 0)
+		sum += 1440;
+	return sum;
 }
 
 function format_minutes(minutes)
@@ -86,26 +102,34 @@ var Event = {
 	color_future: Color.create(0, 255, 0),
 	color_faroff: Color.create(64, 64, 64),
 
-	create: function(name, time_pdt, time_est, time_mesz)
+	utcoffset: (function(){
+		var date = new Date();
+		return minutes(date) - utcminutes(date);
+	})(),
+
+	create: function(name, time_utc)
 	{
 		var event = clone(this);
 		event.name = name;
-		event.time_pdt = time_pdt;
-		event.time_est = time_est;
-		event.time_mesz = time_mesz;
+		event.time_utc = time_utc;
 
 		return event;
 	},
 
-	mins: function()
+	minutes: function()
 	{
-		var parts = this.time_mesz.split(":");
+		var parts = this.time_utc.split(":");
 		return 60*parts[0] + 1*parts[1];
+	},
+
+	format_minutes: function()
+	{
+		return format_minutes(addminutes(this.minutes(), this.utcoffset));
 	},
 
 	dist: function()
 	{
-		return mod((this.mins() - minutes()), 1440);
+		return mod((this.minutes() - utcminutes(new Date())), 1440);
 	},
 
 	visible: function()
@@ -133,103 +157,126 @@ var Event = {
 			html = "<td class='dist'>vor " + dist + " min</td>";
 			color = Color.mix(dist, this.color_faroff, this.dist_past-dist, this.color_past);
 		}
-		html += "<td class='time'>" + this.time_mesz + "</td><th>" + this.name + "</th>";
+		html += "<td class='time'>" + this.time_utc + "</td><th>" + this.name + "</th>";
 		return $("<tr class='" + cssclass + "' style='color: " + color.toString() + "'>" + html + "</tr>");
 	}
 };
 
 var events = [
-	Event.create('Megazerstörer', '16:00', '19:00', '1:00'),
-	Event.create('Dschungelwurm', '16:15', '19:15', '1:15'),
-	Event.create('Schatten-Behemoth', '16:45', '19:45', '1:45'),
-	Event.create('Der Zerschmetterer', '17:00', '20:00', '2:00'),
-	Event.create('Svanir-Schamane', '17:15', '20:15', '2:15'),
-	Event.create('Modniir Ulgoth', '17:30', '20:30', '2:30'),
-	Event.create('Feuerelementar', '17:45', '20:45', '2:45'),
-	Event.create('Karka-Königin', '18:00', '21:00', '3:00'),
-	Event.create('Dschungelwurm', '18:15', '21:15', '3:15'),
-	Event.create('Golem Typ II', '18:30', '21:30', '3:30'),
-	Event.create('Schatten-Behemoth', '18:45', '21:45', '3:45'),
-	Event.create('Tequatl', '19:00', '22:00', '4:00'),
-	Event.create('Svanir-Schamane', '19:15', '22:15', '4:15'),
-	Event.create('Klaue von Jormag', '19:30', '22:30', '4:30'),
-	Event.create('Feuerelementar', '19:45', '22:45', '4:45'),
-	Event.create('Großer Dschungelwurm', '20:00', '23:00', '5:00'),
-	Event.create('Dschungelwurm', '20:15', '23:15', '5:15'),
-	Event.create('Taidha Covington', '20:30', '23:30', '5:30'),
-	Event.create('Schatten-Behemoth', '20:45', '23:45', '5:45'),
-	Event.create('Megazerstörer', '21:00', '0:00', '6:00'),
-	Event.create('Svanir-Schamane', '21:15', '0:15', '6:15'),
-	Event.create('Feuerelementar', '21:45', '0:45', '6:45'),
-	Event.create('Der Zerschmetterer', '22:00', '1:00', '7:00'),
-	Event.create('Dschungelwurm', '22:15', '1:15', '7:15'),
-	Event.create('Modniir Ulgoth', '22:30', '1:30', '7:30'),
-	Event.create('Schatten-Behemoth', '22:45', '1:45', '7:45'),
-	Event.create('Golem Typ II', '23:00', '2:00', '8:00'),
-	Event.create('Svanir-Schamane', '23:15', '2:15', '8:15'),
-	Event.create('Klaue von Jormag', '23:30', '2:30', '8:30'),
-	Event.create('Feuerelementar', '23:45', '2:45', '8:45'),
-	Event.create('Der Zerschmetterer', '24:00:00', '3:00', '9:00'),
-	Event.create('Dschungelwurm', '0:15', '3:15', '9:15'),
-	Event.create('Modniir Ulgoth', '0:30', '3:30', '9:30'),
-	Event.create('Schatten-Behemoth', '0:45', '3:45', '9:45'),
-	Event.create('Golem Typ II', '1:00', '4:00', '10:00'),
-	Event.create('Svanir-Schamane', '1:15', '4:15', '10:15'),
-	Event.create('Klaue von Jormag', '1:30', '4:30', '10:30'),
-	Event.create('Feuerelementar', '1:45', '4:45', '10:45'),
-	Event.create('Taidha Covington', '2:00', '5:00', '11:00'),
-	Event.create('Dschungelwurm', '2:15', '5:15', '11:15'),
-	Event.create('Megazerstörer', '2:30', '5:30', '11:30'),
-	Event.create('Schatten-Behemoth', '2:45', '5:45', '11:45'),
-	Event.create('Svanir-Schamane', '3:15', '6:15', '12:15'),
-	Event.create('Karka-Königin', '3:30', '6:30', '12:30'),
-	Event.create('Feuerelementar', '3:45', '6:45', '12:45'),
-	Event.create('Der Zerschmetterer', '4:00', '7:00', '13:00'),
-	Event.create('Dschungelwurm', '4:15', '7:15', '13:15'),
-	Event.create('Tequatl', '4:30', '7:30', '13:30'),
-	Event.create('Schatten-Behemoth', '4:45', '7:45', '13:45'),
-	Event.create('Modniir Ulgoth', '5:00', '8:00', '14:00'),
-	Event.create('Svanir-Schamane', '5:15', '8:15', '14:15'),
-	Event.create('Großer Dschungelwurm', '5:30', '8:30', '14:30'),
-	Event.create('Feuerelementar', '5:45', '8:45', '14:45'),
-	Event.create('Golem Typ II', '6:00', '9:00', '15:00'),
-	Event.create('Dschungelwurm', '6:15', '9:15', '15:15'),
-	Event.create('Klaue von Jormag', '6:30', '9:30', '15:30'),
-	Event.create('Schatten-Behemoth', '6:45', '9:45', '15:45'),
-	Event.create('Taidha Covington', '7:00', '10:00', '16:00'),
-	Event.create('Dschungelwurm', '7:15', '10:15', '16:15'),
-	Event.create('Megazerstörer', '7:30', '10:30', '16:30'),
-	Event.create('Feuerelementar', '7:45', '10:45', '16:45'),
-	Event.create('Dschungelwurm', '8:15', '11:15', '17:15'),
-	Event.create('Der Zerschmetterer', '8:30', '11:30', '17:30'),
-	Event.create('Schatten-Behemoth', '8:45', '11:45', '17:45'),
-	Event.create('Karka-Königin', '9:00', '12:00', '18:00'),
-	Event.create('Svanir-Schamane', '9:15', '12:15', '18:15'),
-	Event.create('Modniir Ulgoth', '9:30', '12:30', '18:30'),
-	Event.create('Feuerelementar', '9:45', '12:45', '18:45'),
-	Event.create('Tequatl', '10:00', '13:00', '19:00'),
-	Event.create('Dschungelwurm', '10:15', '13:15', '19:15'),
-	Event.create('Golem Typ II', '10:30', '13:30', '19:30'),
-	Event.create('Schatten-Behemoth', '10:45', '13:45', '19:45'),
-	Event.create('Großer Dschungelwurm', '11:00', '14:00', '20:00'),
-	Event.create('Svanir-Schamane', '11:15', '14:15', '20:15'),
-	Event.create('Klaue von Jormag', '11:30', '14:30', '20:30'),
-	Event.create('Feuerelementar', '11:45', '14:45', '20:45'),
-	Event.create('Taidha Covington', '12:00', '15:00', '21:00'),
-	Event.create('Dschungelwurm', '12:15', '15:15', '21:15'),
-	Event.create('Megazerstörer', '12:30', '15:30', '21:30'),
-	Event.create('Schatten-Behemoth', '12:45', '15:45', '21:45'),
-	Event.create('Svanir-Schamane', '13:15', '16:15', '22:15'),
-	Event.create('Der Zerschmetterer', '13:30', '16:30', '22:30'),
-	Event.create('Feuerelementar', '13:45', '16:45', '22:45'),
-	Event.create('Modniir Ulgoth', '14:00', '17:00', '23:00'),
-	Event.create('Dschungelwurm', '14:15', '17:15', '23:15'),
-	Event.create('Golem Typ II', '14:30', '17:30', '23:30'),
-	Event.create('Schatten-Behemoth', '14:45', '17:45', '23:45'),
-	Event.create('Klaue von Jormag', '15:00', '18:00', '0:00'),
-	Event.create('Svanir-Schamane', '15:15', '18:15', '0:15'),
-	Event.create('Taidha Covington', '15:30', '18:30', '0:30'),
-	Event.create('Feuerelementar', '15:45', '18:45', '0:45')
+	Event.create('Tequatl', '00:00'),
+	Event.create('Taidha Covington', '00:00'),
+	Event.create('Svanir-Schamane', '00:15'),
+	Event.create('Megazerstörer', '00:30'),
+	Event.create('Feuerelementar', '00:45'),
+	Event.create('Großer Dschungelwurm', '01:00'),
+	Event.create('Der Zerschmetterer', '01:00'),
+	Event.create('Dschungelwurm', '01:15'),
+	Event.create('Modniir Ulgoth', '01:30'),
+	Event.create('Schatten-Behemoth', '01:45'),
+	Event.create('Karka-Königin', '02:00'),
+	Event.create('Golem Typ II', '02:00'),
+	Event.create('Svanir-Schamane', '02:15'),
+	Event.create('Klaue von Jormag', '02:30'),
+	Event.create('Feuerelementar', '02:45'),
+	Event.create('Tequatl', '03:00'),
+	Event.create('Taidha Covington', '03:00'),
+	Event.create('Dschungelwurm', '03:15'),
+	Event.create('Megazerstörer', '03:30'),
+	Event.create('Schatten-Behemoth', '03:45'),
+	Event.create('Großer Dschungelwurm', '04:00'),
+	Event.create('Der Zerschmetterer', '04:00'),
+	Event.create('Svanir-Schamane', '04:15'),
+	Event.create('Modniir Ulgoth', '04:30'),
+	Event.create('Feuerelementar', '04:45'),
+	Event.create('Golem Typ II', '05:00'),
+	Event.create('Dschungelwurm', '05:15'),
+	Event.create('Klaue von Jormag', '05:30'),
+	Event.create('Schatten-Behemoth', '05:45'),
+	Event.create('Karka-Königin', '06:00'),
+	Event.create('Taidha Covington', '06:00'),
+	Event.create('Svanir-Schamane', '06:15'),
+	Event.create('Megazerstörer', '06:30'),
+	Event.create('Feuerelementar', '06:45'),
+	Event.create('Tequatl', '07:00'),
+	Event.create('Der Zerschmetterer', '07:00'),
+	Event.create('Dschungelwurm', '07:15'),
+	Event.create('Modniir Ulgoth', '07:30'),
+	Event.create('Schatten-Behemoth', '07:45'),
+	Event.create('Großer Dschungelwurm', '08:00'),
+	Event.create('Golem Typ II', '08:00'),
+	Event.create('Svanir-Schamane', '08:15'),
+	Event.create('Klaue von Jormag', '08:30'),
+	Event.create('Feuerelementar', '08:45'),
+	Event.create('Taidha Covington', '09:00'),
+	Event.create('Dschungelwurm', '09:15'),
+	Event.create('Megazerstörer', '09:30'),
+	Event.create('Schatten-Behemoth', '09:45'),
+	Event.create('Der Zerschmetterer', '10:00'),
+	Event.create('Svanir-Schamane', '10:15'),
+	Event.create('Karka-Königin', '10:30'),
+	Event.create('Modniir Ulgoth', '10:30'),
+	Event.create('Feuerelementar', '10:45'),
+	Event.create('Golem Typ II', '11:00'),
+	Event.create('Dschungelwurm', '11:15'),
+	Event.create('Tequatl', '11:30'),
+	Event.create('Klaue von Jormag', '11:30'),
+	Event.create('Schatten-Behemoth', '11:45'),
+	Event.create('Taidha Covington', '12:00'),
+	Event.create('Svanir-Schamane', '12:15'),
+	Event.create('Großer Dschungelwurm', '12:30'),
+	Event.create('Megazerstörer', '12:30'),
+	Event.create('Feuerelementar', '12:45'),
+	Event.create('Der Zerschmetterer', '13:00'),
+	Event.create('Dschungelwurm', '13:15'),
+	Event.create('Modniir Ulgoth', '13:30'),
+	Event.create('Schatten-Behemoth', '13:45'),
+	Event.create('Golem Typ II', '14:00'),
+	Event.create('Svanir-Schamane', '14:15'),
+	Event.create('Klaue von Jormag', '14:30'),
+	Event.create('Feuerelementar', '14:45'),
+	Event.create('Karka-Königin', '15:00'),
+	Event.create('Taidha Covington', '15:00'),
+	Event.create('Dschungelwurm', '15:15'),
+	Event.create('Megazerstörer', '15:30'),
+	Event.create('Schatten-Behemoth', '15:45'),
+	Event.create('Tequatl', '16:00'),
+	Event.create('Der Zerschmetterer', '16:00'),
+	Event.create('Svanir-Schamane', '16:15'),
+	Event.create('Modniir Ulgoth', '16:30'),
+	Event.create('Feuerelementar', '16:45'),
+	Event.create('Großer Dschungelwurm', '17:00'),
+	Event.create('Golem Typ II', '17:00'),
+	Event.create('Dschungelwurm', '17:15'),
+	Event.create('Klaue von Jormag', '17:30'),
+	Event.create('Schatten-Behemoth', '17:45'),
+	Event.create('Karka-Königin', '18:00'),
+	Event.create('Taidha Covington', '18:00'),
+	Event.create('Svanir-Schamane', '18:15'),
+	Event.create('Megazerstörer', '18:30'),
+	Event.create('Feuerelementar', '18:45'),
+	Event.create('Tequatl', '19:00'),
+	Event.create('Der Zerschmetterer', '19:00'),
+	Event.create('Dschungelwurm', '19:15'),
+	Event.create('Modniir Ulgoth', '19:30'),
+	Event.create('Schatten-Behemoth', '19:45'),
+	Event.create('Großer Dschungelwurm', '20:00'),
+	Event.create('Golem Typ II', '20:00'),
+	Event.create('Svanir-Schamane', '20:15'),
+	Event.create('Klaue von Jormag', '20:30'),
+	Event.create('Feuerelementar', '20:45'),
+	Event.create('Taidha Covington', '21:00'),
+	Event.create('Dschungelwurm', '21:15'),
+	Event.create('Megazerstörer', '21:30'),
+	Event.create('Schatten-Behemoth', '21:45'),
+	Event.create('Der Zerschmetterer', '22:00'),
+	Event.create('Svanir-Schamane', '22:15'),
+	Event.create('Modniir Ulgoth', '22:30'),
+	Event.create('Feuerelementar', '22:45'),
+	Event.create('Karka-Königin', '23:00'),
+	Event.create('Golem Typ II', '23:00'),
+	Event.create('Dschungelwurm', '23:15'),
+	Event.create('Klaue von Jormag', '23:30'),
+	Event.create('Schatten-Behemoth', '23:45')
 ];
 
 function make_events()
