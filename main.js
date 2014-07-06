@@ -141,6 +141,8 @@ var EventDate = {
 		if (!this.visible())
 			return null;
 		var html, dist = this.dist(), isfuture = dist < 720, cssclass = isfuture ? "future" : "past", color;
+		if (this.event.done)
+			cssclass += " done";
 		if (isfuture)
 		{
 			if (dist == 0)
@@ -155,8 +157,17 @@ var EventDate = {
 			html = "<td class='dist'>vor " + dist + " min</td>";
 			color = Color.mix(dist, this.color_faroff, this.dist_past-dist, this.color_past);
 		}
-		html += "<td class='time'>" + this.format_minutes() + "</td><th>" + this.event.name + "</th>";
-		return $("<tr class='" + cssclass + "' style='color: " + color.toString() + "'>" + html + "</tr>");
+		html += "<td class='time'>" + this.format_minutes() + "</td><td class='state'>" + (this.event.done ? "\u2713" : "") + "</td><th>" + this.event.name + "</th>";
+		html = $("<tr class='event " + cssclass + "'" + (this.event.done ? "" : " style='color: " + color.toString() + "'") + ">" + html + "</tr>");
+		var self = this;
+		html.click(function(event){self.toggle()});
+		return html;
+	},
+
+	toggle: function()
+	{
+		this.event.done = !this.event.done;
+		make_events();
 	}
 };
 
@@ -171,6 +182,7 @@ var Event = {
 		{
 			event = clone(this);
 			event.name = name;
+			event.done = false;
 			event.dates = [];
 			this.events[name] = event;
 		}
@@ -185,7 +197,7 @@ var Event = {
 
 };
 
-var events = [
+var eventdates = [
 	Event.create('Tequatl', '00:00'),
 	Event.create('Taidha Covington', '00:00'),
 	Event.create('Svanir-Schamane', '00:15'),
@@ -306,19 +318,34 @@ function make_events()
 {
 	var allhtml = $("<table id='events'/>"), lastdist = null;
 	var now = minutes();
-	var offset = Math.floor(now/1440*events.length+events.length/2);
-	for (var i = 0; i < events.length; ++i)
+	var offset = Math.floor(now/1440*eventdates.length+eventdates.length/2);
+	var anydone = false;
+	for (var i = 0; i < eventdates.length; ++i)
 	{
-		var event = events[mod(i+offset, events.length)], dist = event.dist();
+		var event = eventdates[mod(i+offset, eventdates.length)], dist = event.dist();
 
 		if (lastdist > 720 && dist < 720)
 		{
-			allhtml.append("<tr class='now'><td></td><td>" + format_minutes(now) + "</td><td></td></tr>");
+			allhtml.append("<tr class='now'><td></td><td>" + format_minutes(now) + "</td><td></td><td></td></tr>");
 		}
 		var html = event.html();
 		if (html !== null)
 			allhtml.append(html);
 		lastdist = dist;
+		if (event.event.done)
+			anydone = true;
+	}
+	if (anydone)
+	{
+		var reset = $("<tr class='reset'><td colspan='4'>Erledigtstatus zurücksetzen</td></tr>");
+		reset.click(function(event){
+			for (var name in Event.events)
+			{
+				Event.events[name].done = false;
+				make_events();
+			}
+		});
+		allhtml.append(reset);
 	}
 	allhtml.replaceAll("#events");
 }
