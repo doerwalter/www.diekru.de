@@ -157,7 +157,7 @@ var Event = {
 			html = "<td class='dist'>vor " + dist + " min</td>";
 			color = Color.mix(dist, this.color_faroff, this.dist_past-dist, this.color_past);
 		}
-		html += "<td class='time'>" + this.time_utc + "</td><th>" + this.name + "</th>";
+		html += "<td class='time'>" + this.format_minutes() + "</td><th>" + this.name + "</th>";
 		return $("<tr class='" + cssclass + "' style='color: " + color.toString() + "'>" + html + "</tr>");
 	}
 };
