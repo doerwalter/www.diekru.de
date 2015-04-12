@@ -31,14 +31,12 @@ function lpad(string, pad, len)
 
 function minutes(date)
 {
-	var now = new Date();
-	return 60*now.getHours() + now.getMinutes();
+	return 60*date.getHours() + date.getMinutes();
 }
 
 function utcminutes(date)
 {
-	var now = new Date();
-	return 60*now.getUTCHours() + now.getUTCMinutes();
+	return 60*date.getUTCHours() + date.getUTCMinutes();
 }
 
 function addminutes(mins1, mins2)
