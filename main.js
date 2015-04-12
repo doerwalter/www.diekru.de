@@ -315,7 +315,7 @@ var eventdates = [
 function make_events()
 {
 	var allhtml = $("<table id='events'/>"), lastdist = null;
-	var now = minutes();
+	var now = minutes(new Date());
 	var offset = Math.floor(now/1440*eventdates.length+eventdates.length/2);
 	var anydone = false;
 	for (var i = 0; i < eventdates.length; ++i)
