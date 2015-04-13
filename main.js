@@ -194,7 +194,32 @@ var Event = {
 		return eventdate;
 	},
 
+	// Return a JSON object containing the state of all events
+	asJSON: function()
+	{
+		var done = {};
 
+		for (var eventname in this.events)
+		{
+			var event = this.events[eventname];
+			if (event.done)
+			{
+				done[event.id] = true;
+			}
+		}
+		return done;
+	},
+
+	// Set the state of all event from the object ``done`` (which must be produced by ``asJSON``)
+	fromJSON: function(done)
+	{
+		for (var eventname in this.events)
+		{
+			var event = this.events[eventname];
+			event.done = done[event.id] || false;
+		}
+		make_events();
+	}
 };
 
 var eventdates = [
