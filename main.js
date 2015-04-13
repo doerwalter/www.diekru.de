@@ -23,9 +23,13 @@ function mod(obj1, obj2)
 function lpad(string, pad, len)
 {
 	if (typeof(string) === "number")
+	{
 		string = string.toString();
+	}
 	while (string.length < len)
+	{
 		string = pad + string;
+	}
 	return string;
 };
 
@@ -43,9 +47,13 @@ function addminutes(mins1, mins2)
 {
 	var sum = mins1 + mins2;
 	if (sum >= 1440)
+	{
 		sum -= 1440;
+	}
 	else if (sum < 0)
+	{
 		sum += 1440;
+	}
 	return sum;
 }
 
@@ -75,9 +83,13 @@ var Color = {
 		var g = lpad(this.g.toString(16), "0", 2);
 		var b = lpad(this.b.toString(16), "0", 2);
 		if (r[0] === r[1] && g[0] === g[1] && b[0] === b[1])
+		{
 			return "#" + r[0] + g[0] + b[0];
+		}
 		else
+		{
 			return "#" + r + g + b;
+		}
 	},
 
 	mix: function(value1, color1, value2, color2)
@@ -137,16 +149,24 @@ var EventDate = {
 	html: function()
 	{
 		if (!this.visible())
+		{
 			return null;
+		}
 		var html, dist = this.dist(), isfuture = dist < 720, cssclass = isfuture ? "future" : "past", color;
 		if (this.event.done)
+		{
 			cssclass += " done";
+		}
 		if (isfuture)
 		{
 			if (dist == 0)
+			{
 				html = "<td class='dist'>jetzt</td>";
+			}
 			else
+			{
 				html = "<td class='dist'>in " + dist + " min</td>";
+			}
 			color = Color.mix(dist, this.color_faroff, this.dist_future-dist, this.color_future);
 		}
 		else
@@ -187,7 +207,9 @@ var Event = {
 			this.events[name] = event;
 		}
 		else
+		{
 			event = this.events[name];
+		}
 		var eventdate = EventDate.create(event, time_utc);
 		event.dates.push(eventdate);
 
