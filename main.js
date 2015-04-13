@@ -216,29 +216,35 @@ var Event = {
 		return eventdate;
 	},
 
-	// Return a JSON object containing the state of all events
-	asJSON: function()
+	// Return a string containing the state of all events
+	exportState: function()
 	{
-		var done = {};
+		var done = [];
 
 		for (var eventname in this.events)
 		{
 			var event = this.events[eventname];
 			if (event.done)
 			{
-				done[event.id] = true;
+				done.push(event.id);
 			}
 		}
-		return done;
+		return done.join(",");
 	},
 
-	// Set the state of all event from the object ``done`` (which must be produced by ``asJSON``)
-	fromJSON: function(done)
+	// Set the state of all event from the object ``done`` (which must be produced by ``exportState``)
+	importState: function(done)
 	{
+		done = done.split(",");
+		var doneMap = {};
+		for (var i = 0; i < done.length; ++i)
+		{
+			doneMap[done[i]] = true;
+		}
 		for (var eventname in this.events)
 		{
 			var event = this.events[eventname];
-			event.done = done[event.id] || false;
+			event.done = doneMap[event.id] || false;
 		}
 		make_events();
 	}
