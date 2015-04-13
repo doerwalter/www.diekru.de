@@ -424,8 +424,7 @@ function make_events()
 function start_events_handler()
 {
 	Event.loadStateFromCookie();
-	make_events();
-	window.setTimeout(make_events_handler, 10000);
+	make_events_handler();
 }
 
 function make_events_handler()
