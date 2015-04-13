@@ -171,6 +171,7 @@ var EventDate = {
 
 var Event = {
 	events: {},
+	_idcounter: 0,
 
 	create: function(name, time_utc)
 	{
@@ -182,6 +183,7 @@ var Event = {
 			event.name = name;
 			event.done = false;
 			event.dates = [];
+			event.id = this._idcounter++; // Give each event a unique number
 			this.events[name] = event;
 		}
 		else
