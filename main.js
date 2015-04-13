@@ -216,7 +216,7 @@ var Event = {
 		return eventdate;
 	},
 
-	// Return a string containing the state of all events
+	// Return a string containing the state of all events (the ids of the done event comma separated)
 	exportState: function()
 	{
 		var done = [];
@@ -232,7 +232,7 @@ var Event = {
 		return done.join(",");
 	},
 
-	// Set the state of all event from the object ``done`` (which must be produced by ``exportState``)
+	// Set the state of all events from the object ``done`` (which must be produced by ``exportState``)
 	importState: function(done)
 	{
 		done = done.split(",");
