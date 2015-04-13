@@ -185,6 +185,7 @@ var EventDate = {
 	toggle: function()
 	{
 		this.event.done = !this.event.done;
+		Event.saveStateToCookie();
 		make_events();
 	}
 };
@@ -232,6 +233,12 @@ var Event = {
 		return done.join(",");
 	},
 
+	// Save the state to a cookie
+	saveStateToCookie: function()
+	{
+		$.cookie("gw2-events-done", this.exportState(), {expires: 1});
+	},
+
 	// Set the state of all events from the object ``done`` (which must be produced by ``exportState``)
 	importState: function(done)
 	{
@@ -247,7 +254,17 @@ var Event = {
 			event.done = doneMap[event.id] || false;
 		}
 		make_events();
+	},
+
+	// load the state from a cookie
+	loadStateFromCookie: function()
+	{
+		var done = $.cookie("gw2-events-done");
+
+		if (typeof(done) !== "undefined")
+			this.importState(done);
 	}
+
 };
 
 var eventdates = [
@@ -397,10 +414,18 @@ function make_events()
 				Event.events[name].done = false;
 				make_events();
 			}
+			Event.saveStateToCookie();
 		});
 		allhtml.append(reset);
 	}
 	allhtml.replaceAll("#events");
+}
+
+function start_events_handler()
+{
+	Event.loadStateFromCookie();
+	make_events();
+	window.setTimeout(make_events_handler, 10000);
 }
 
 function make_events_handler()
